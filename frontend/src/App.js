@@ -4,14 +4,16 @@ import "./App.css";
 
 function App() {
   const [balance, setBalance] = useState(0);
+  const [connectedAddress, setConnectedAddress] = useState(0);
   const [isadmin, setIsadmin] = useState(false);
   async function requestAccount() {
     await window.ethereum.request({ method: "eth_requestAccounts" });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const connectedAddress = await signer.getAddress();
-    //const balance = await token.balanceOf(signer.getAddress());
-    setBalance(balance.toString());
+    const addr = await signer.getAddress();
+    const balance = await provider.getBalance(addr);
+    setBalance(ethers.utils.formatEther(balance.toString()));
+    setConnectedAddress(addr);
     // if (owner === connectedAddress) {
     //   setIsadmin(true);
     // } else {
@@ -44,7 +46,7 @@ function App() {
               >
                 <div class="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
                   <div class="flex items-center justify-between w-full md:w-auto">
-                    <a href="#" class="text-3xl text-indigo-600">
+                    <a href="#" class="text-2xl text-indigo-600">
                       NFTBet
                     </a>
                   </div>
@@ -54,13 +56,13 @@ function App() {
                     href="#"
                     class="font-medium text-gray-500 hover:text-gray-900"
                   >
-                    Balance
+                    {balance}ETH
                   </a>
                   <a
                     href="#"
                     class="font-medium text-gray-500 hover:text-gray-900"
                   >
-                    Address
+                    {connectedAddress}
                   </a>
                 </div>
               </nav>

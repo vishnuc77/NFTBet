@@ -19,9 +19,9 @@ contract StakingContract is Ownable {
         address => StakeDetails
     ) public staked;
 
-    uint[] staked;
+    address[] players;
 
-    address public treasury;
+    address payable public treasury;
     uint balance;
 
     event StakedEvent(
@@ -42,20 +42,17 @@ contract StakingContract is Ownable {
     * @dev Initializer constructor for the contract
     * @param treasuryAddress Address to which the collected money are to be sent
     */
-    function initialize(
-        address treasuryAddress
-    ) public initializer {
+    constructor(address payable treasuryAddress) {
         treasury = treasuryAddress;
     }
 
     /**
     * @dev Function that allows staking of the tokens
-    * @param amount The number of tokens to be staked
     */
-    function stake() virtual external{
+    function stake() virtual external payable{
         require(msg.value == 0.01 ether, "Amount for betting is 0.01 ether");
-        address(this).transfer(msg.value);
         staked[msg.sender] = StakeDetails({stakedAmount: msg.value, stakedTimestamp: block.timestamp});
+        players.push(msg.sender);
         emit StakedEvent(msg.sender, msg.value, block.timestamp);
     }
 
@@ -64,7 +61,7 @@ contract StakingContract is Ownable {
     * @notice Can only be called by the owner of the contract
     * @param newTreasuryAddress The new address to which the collected fees will be spent
      */
-    function changeTreasuryAddress(address newTreasuryAddress) public onlyOwner{
+    function changeTreasuryAddress(address payable newTreasuryAddress) public onlyOwner{
         require(newTreasuryAddress != address(0), "Non zero address required");
         treasury = newTreasuryAddress;
         emit TreasuryAddressChanged(newTreasuryAddress);
@@ -76,10 +73,20 @@ contract StakingContract is Ownable {
      */
     function sendToTreasury() public onlyOwner{
         balance = address(this).balance;
-        address(treasury).transfer(balance);
-        emit sentToTresury(balance);
+        treasury.transfer(balance);
+        emit sentToTreasury(balance);
     }
 
+    function pickWinner() public onlyOwner returns (address) {
+        uint index = random() % players.length;
+        address winner = players[index];
+        delete players;
+        return winner;
+    }
+
+    function random() private view returns (uint) {
+        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, players)));
+    }
 
     // Function to receive Ether. msg.data must be empty
     receive() external payable {}

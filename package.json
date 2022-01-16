@@ -9,7 +9,8 @@
     "hardhat": "^2.8.2"
   },
   "dependencies": {
-    "nft.storage": "^5.2.0",
-    "@openzeppelin/contracts": "^4.4.2"
+    "@openzeppelin/contracts": "^4.4.2",
+    "dotenv": "^12.0.4",
+    "nft.storage": "^5.2.0"
   }
 }
