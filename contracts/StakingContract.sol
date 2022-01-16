@@ -19,7 +19,7 @@ contract StakingContract is Ownable {
         address => StakeDetails
     ) public staked;
 
-    address[] players;
+    address[] public players;
 
     address payable public treasury;
     uint balance;
@@ -77,11 +77,14 @@ contract StakingContract is Ownable {
         emit sentToTreasury(balance);
     }
 
-    function pickWinner() public onlyOwner returns (address) {
+    function pickWinner() public view onlyOwner returns (address) {
         uint index = random() % players.length;
         address winner = players[index];
-        delete players;
         return winner;
+    }
+
+    function clearPlayersArray() public onlyOwner {
+        delete players;
     }
 
     function random() private view returns (uint) {
