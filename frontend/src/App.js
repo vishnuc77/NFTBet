@@ -75,6 +75,24 @@ function App() {
     }
   }
 
+  async function startNew() {
+    if (typeof window.ethereum !== "undefined") {
+      await requestAccount();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        Staking.address,
+        Staking.abi,
+        signer
+      );
+      try {
+        await contract.clearPlayersArray();
+      } catch (err) {
+        console.log("Error: ", err);
+      }
+    }
+  }
+
   return (
     <div class="relative bg-white overflow-hidden">
       <div class="max-w-7xl mx-auto">
@@ -161,6 +179,26 @@ function App() {
                     onClick={pickWinner}
                   >
                     Pick Winner
+                  </button>{" "}
+                  <br /> <br />
+                  <button
+                    className="
+                      bg-violet-500
+                      rounded-md
+                      p-2
+                      inline-flex
+                      items-center
+                      justify-center
+                      text-white
+                      hover:bg-violet-400
+                      active:bg-violet-600
+                      focus:outline-none
+                      focus:ring
+                      focus:ring-violet-300
+                      aria-expanded=false"
+                    onClick={startNew}
+                  >
+                    Start new game
                   </button>
                 </div>
               ) : (
