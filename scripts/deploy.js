@@ -6,8 +6,8 @@ const client = new NFTStorage({
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDAxOTQwOTkwZmMxQjEyODZDNTBmOTFEMzBEYzQ3QjZFMDhmNDQwN0EiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY0MjMxMTE4MDc5NywibmFtZSI6Im5mdGJldCJ9.OYctdmwHCX5YmRHTHtlkWcagIe3MMsHlREVW25eOVX8",
 });
 
-export async function storeMetadata() {
-  fs.readFile("../public/logo192.png", "utf-8", async (err, data) => {
+async function storeMetadata() {
+  fs.readFile("scripts/logo192.png", "utf-8", async (err, data) => {
     if (err) throw err;
     const url = await store(data);
     console.log("Stored NFT successfully!\nMetadata URL: ", url);
@@ -36,3 +36,5 @@ async function store(data) {
 
   return metadataUrl;
 }
+
+storeMetadata();
