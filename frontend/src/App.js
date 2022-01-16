@@ -1,5 +1,7 @@
 import { ethers } from "ethers";
 import { useState } from "react";
+import Staking from "./Staking.json";
+import Nft from "./Nft.json";
 import "./App.css";
 
 function App() {
@@ -11,19 +13,67 @@ function App() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const addr = await signer.getAddress();
+    const staking = new ethers.Contract(Staking.address, Staking.abi, signer);
+    const nft = new ethers.Contract(Nft.address, Nft.abi, signer);
+    const owner = await staking.owner();
     const balance = await provider.getBalance(addr);
     setBalance(ethers.utils.formatEther(balance.toString()));
     setConnectedAddress(addr);
-    // if (owner === connectedAddress) {
-    //   setIsadmin(true);
-    // } else {
-    //   setIsadmin(false);
-    // }
+    if (owner === addr) {
+      setIsadmin(true);
+    } else {
+      setIsadmin(false);
+    }
   }
 
-  async function store() {}
+  async function pickWinner() {
+    if (typeof window.ethereum !== "undefined") {
+      let winnerAddress;
+      await requestAccount();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        Staking.address,
+        Staking.abi,
+        signer
+      );
+      try {
+        winnerAddress = await contract.pickWinner();
+        console.log(winnerAddress);
+      } catch (err) {
+        console.log("Error: ", err);
+      }
 
-  async function bet() {}
+      const nft = new ethers.Contract(Nft.address, Nft.abi, signer);
+      try {
+        await nft.safeMint(winnerAddress);
+      } catch (err) {
+        console.log("Error: ", err);
+      }
+    }
+  }
+
+  async function bet() {
+    if (typeof window.ethereum !== "undefined") {
+      await requestAccount();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        Staking.address,
+        Staking.abi,
+        signer
+      );
+      const wei = ethers.utils.parseEther("0.01");
+      const override = {
+        value: wei,
+      };
+      try {
+        await contract.stake(override);
+      } catch (err) {
+        console.log("Error: ", err);
+      }
+    }
+  }
 
   return (
     <div class="relative bg-white overflow-hidden">
@@ -91,25 +141,51 @@ function App() {
                 Connect wallet
               </button>
               <br /> <br />
-              <button
-                className="
-                bg-violet-500
-                rounded-md
-                p-2
-                inline-flex
-                items-center
-                justify-center
-                text-white
-                hover:bg-violet-400
-                active:bg-violet-600
-                focus:outline-none
-                focus:ring
-                focus:ring-violet-300
-                aria-expanded=false"
-                onClick={bet}
-              >
-                Bet
-              </button>
+              {isadmin ? (
+                <div>
+                  <button
+                    className="
+                      bg-violet-500
+                      rounded-md
+                      p-2
+                      inline-flex
+                      items-center
+                      justify-center
+                      text-white
+                      hover:bg-violet-400
+                      active:bg-violet-600
+                      focus:outline-none
+                      focus:ring
+                      focus:ring-violet-300
+                      aria-expanded=false"
+                    onClick={pickWinner}
+                  >
+                    Pick Winner
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <button
+                    className="
+                      bg-violet-500
+                      rounded-md
+                      p-2
+                      inline-flex
+                      items-center
+                      justify-center
+                      text-white
+                      hover:bg-violet-400
+                      active:bg-violet-600
+                      focus:outline-none
+                      focus:ring
+                      focus:ring-violet-300
+                      aria-expanded=false"
+                    onClick={bet}
+                  >
+                    Bet
+                  </button>
+                </div>
+              )}
             </div>
           </main>
         </div>
