@@ -9,12 +9,17 @@ const client = new NFTStorage({
 let metadataUrl;
 
 async function storeMetadata() {
-  metadataUrl = await store();
-  console.log("Stored NFT successfully!\nMetadata URL: ", metadataUrl);
+  fs.readFile("scripts/logo.png", "utf-8", async (err, data) => {
+    if (err) throw err;
+
+    const metadataUrl = await store(data);
+    console.log("Stored NFT successfully!\nMetadata URL: ", metadataUrl);
+  });
 }
 
-async function store() {
-  const fileUrl = "https://i.ibb.co/dmGjzRt/dice.jpg";
+async function store(data) {
+  const fileCid = await client.storeBlob(new Blob([data]));
+  const fileUrl = "https://ipfs.io/ipfs/" + fileCid;
 
   const obj = {
     name: "NFTBet",
