@@ -8,6 +8,7 @@ function App() {
   const [balance, setBalance] = useState(0);
   const [connectedAddress, setConnectedAddress] = useState(0);
   const [isadmin, setIsadmin] = useState(false);
+  const [winner, setWinner] = useState(0);
   async function requestAccount() {
     await window.ethereum.request({ method: "eth_requestAccounts" });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -50,6 +51,7 @@ function App() {
       } catch (err) {
         console.log("Error: ", err);
       }
+      setWinner(winnerAddress);
     }
   }
 
@@ -87,6 +89,24 @@ function App() {
       );
       try {
         await contract.clearPlayersArray();
+      } catch (err) {
+        console.log("Error: ", err);
+      }
+    }
+  }
+
+  async function collectFee() {
+    if (typeof window.ethereum !== "undefined") {
+      await requestAccount();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        Staking.address,
+        Staking.abi,
+        signer
+      );
+      try {
+        await contract.sendToTreasury();
       } catch (err) {
         console.log("Error: ", err);
       }
@@ -139,6 +159,10 @@ function App() {
           <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
             <div class="sm:text-center lg:text-left">
               <br />
+              <div class="bg-green-300 border-green-600 border-b p-2 rounded">
+                Last winner: {winner}
+              </div>
+              <br />
               <button
                 className="
                 bg-violet-500
@@ -179,7 +203,7 @@ function App() {
                     onClick={pickWinner}
                   >
                     Pick Winner
-                  </button>{" "}
+                  </button>
                   <br /> <br />
                   <button
                     className="
@@ -199,6 +223,26 @@ function App() {
                     onClick={startNew}
                   >
                     Start new game
+                  </button>
+                  <br /> <br />
+                  <button
+                    className="
+                      bg-violet-500
+                      rounded-md
+                      p-2
+                      inline-flex
+                      items-center
+                      justify-center
+                      text-white
+                      hover:bg-violet-400
+                      active:bg-violet-600
+                      focus:outline-none
+                      focus:ring
+                      focus:ring-violet-300
+                      aria-expanded=false"
+                    onClick={collectFee}
+                  >
+                    Collect fee
                   </button>
                 </div>
               ) : (
